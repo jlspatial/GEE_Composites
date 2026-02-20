@@ -12,3 +12,8 @@ England imagery is a three-year composite of images (2017-2019) in the spring-su
 If you have any questions, feel free to email me at joelillis@gmail.com or jl1108@exeter.ac.uk 
 
 Feel free to use and adapt this code, just reference back to me (Joe Lillis), and this repository. Associated publications which use this data will be added later.
+
+IMPORTANT: in order to extract and use the data on your own machine, you'll have to follow guidance at:
+
+https://developers.google.com/earth-engine/apidocs/export-image-todrive
+
