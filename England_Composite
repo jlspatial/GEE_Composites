@@ -5,6 +5,8 @@
 
 // Created for non-commercial use. 
 
+// Snapshot link to code in GEE: https://code.earthengine.google.com/4ba12d0ecaacb4b0b800936b38078cf4?noload=true
+
 // -------COPY + PASTE BELOW INTO EARTH ENGINE -------- //
 
 // Set Sentinel 2 pre-processed surface reflectance, harmonized colleciton.
