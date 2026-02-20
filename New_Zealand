@@ -8,6 +8,8 @@
 
 // In order to extract the data, follow GEE's guidance on exporting assets to account and drive. 
 
+Snapshot link to code here: https://code.earthengine.google.com/ebc548e4e18e6794675c7b3a076c493f?noload=true
+
 // -------COPY + PASTE BELOW INTO EARTH ENGINE -------- //
 
 // Set Sentinel 2 pre-processed surface reflectance, harmonized colleciton.
