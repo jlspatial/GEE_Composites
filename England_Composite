@@ -1,0 +1,77 @@
+// Google Earth Engine (Javascript) code to create a composite of 2017-2019 imagery of the whole of England //
+
+// Creator: Joe Lillis, PhD Student, 2026. European Centre for Environment and Human Health. 
+// Email: jl1108@exeter.ac.uk / joelillis@gmail.com 
+
+// Created for non-commercial use. 
+
+// -------COPY + PASTE BELOW INTO EARTH ENGINE -------- //
+
+// Set Sentinel 2 pre-processed surface reflectance, harmonized colleciton.
+var s2 = ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED");
+
+// Set NDVI Palette (ndpal) //
+var ndpal = {
+  bands: ["nd"],
+  min: -0.1,
+  max: 1,
+  opacity: 1,
+  palette: ["dc0909","beb90b","048102"]
+};
+
+// Set True colour palette (truevis) //
+var truevis = {
+bands: ["B4","B3","B2"],
+opacity: 1,
+max: 3000,
+gamma: 1.439,
+};
+
+// Create England boundary limits //
+var country = ee.FeatureCollection("FAO/GAUL/2015/level1");
+var roi = country.filter(ee.Filter.eq('ADM1_NAME', 'England'));
+Map.centerObject(roi, 8); 
+
+// Convert this to a geometry to be able to alter boundaries
+var englandShape = ee.FeatureCollection("FAO/GAUL/2015/level1").filter(ee.Filter.eq('ADM1_NAME', 'England'));
+var geometry = englandShape.geometry();
+
+// additional 1km buffer to England boundaries (ensure full coverage of land).
+var buff_eng = geometry.buffer(1000); 
+
+// Cloud mask function for all images (QA60) //
+function cloudMask(image){
+var qa60 = image.select('QA60');
+var cloudmask = (qa60.neq(0));
+return image.updateMask(cloudmask.eq(0));
+}
+
+// CREATE a 3 year image collection, spring-summer 2017-2019, <25% cloud, QA60 mask //
+
+var image6 = s2.filterBounds(buff_eng)
+                .filter(ee.Filter.or(ee.Filter.date('2017-04-01', '2017-09-30'),
+                ee.Filter.date('2018-04-01', '2018-09-30'), (ee.Filter.date('2019-04-01', '2019-09-30'))))
+                .filterMetadata('CLOUDY_PIXEL_PERCENTAGE', 'less_than', 25)
+                .map(cloudMask);
+
+// Image collection details.       
+// 1. NDVI
+var image6filt = image6.select(['B8', 'B4']);
+
+// 2. True Colour
+var truefilt = image6.select(['B4', 'B3', 'B2']);
+
+// 3. NDVI Median Composite (replace .median with .max or others to alter)
+var comp = image6filt.median().clip(buff_eng); 
+
+// 4. True Colour median Composite (as above, replace .median)
+var comp_3yr_true = truefilt.median().clip(buff_eng);
+
+// Add both to current GEE map // 
+
+// NDVI image (first carry out normalized differencing)
+var ndvi_3yr = comp.normalizedDifference(['B8', 'B4']);
+Map.addLayer(ndvi_3yr, ndpal, 'NDVI 3-year (Median)', true);
+
+// True Colour Image
+Map.addLayer(comp_3yr_true, truevis, 'True Median');
