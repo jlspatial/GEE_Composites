@@ -1,7 +1,7 @@
 Author: Joe Lillis, PhD student at the European Centre for Environment and Human Health. 
 Google Earth Engine (GEE) code, tested and working as of 20/2/2026. 
 
----- Be aware that I am a registered academic, non-commercial user of GEE. You can use this for similar purposes, but not for commercial use ----
+-- Be aware that I am a registered academic, non-commercial user of GEE. You can use this for similar purposes, but not for commercial use --
 
 Examples include: area of England and New Zealand, with comprehensive coverage of both (check the time periods). 
 
