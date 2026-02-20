@@ -1,0 +1,83 @@
+// Google Earth Engine (Javascript) code to create a composite of 2017-2019 imagery of 
+// the whole of Aotearoa, New Zealand. //
+
+// Creator: Joe Lillis, PhD Student, 2026. European Centre for Environment and Human Health. 
+// Email: jl1108@exeter.ac.uk / joelillis@gmail.com 
+
+// Created for non-commercial use. 
+
+// In order to extract the data, follow GEE's guidance on exporting assets to account and drive. 
+
+// -------COPY + PASTE BELOW INTO EARTH ENGINE -------- //
+
+// Set Sentinel 2 pre-processed surface reflectance, harmonized colleciton.
+var s2 = ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED");
+
+// Using Median value, create composites of Aotearoa, New Zealand //
+
+// NOTES: 1. SCL cloud masking. 2. <5% cloud threshold. 3. 
+
+// Basic visual parameters
+var truevis = {bands: ["B4", "B3", "B2"],
+                      min: -885.8, 
+                      max: 3707.2, 
+                      gamma: 1.1,
+                      opacity: 1};
+
+var ndvis = {bands: ["nd"],
+                    min: -0.1,
+                    max: 1,
+                    palette: ["dc0909","beb90b","048102"]
+                    };
+
+// var ndvis2 = {bands: ["nd"],
+//                     min: 0,
+//                     max: 1,
+//                     palette: ["red", "orange", "green"]}
+//                     ;
+// Masking function (SCL - clouds and cloud shadow)
+
+
+//SCL Mask
+function maskSCL(image_scl){
+  var scl = image_scl.select('SCL')
+  var maskscl = (scl.eq(3).or(scl.gte(7).and(scl.lte(10))));
+  return image_scl.updateMask(maskscl.eq(0));
+}
+
+// Define New Zealand Area // 
+var nzShape = ee.FeatureCollection("FAO/GAUL/2015/level1").filter(ee.Filter.eq('ADM0_NAME', 'New Zealand'));
+var geometryNZ = nzShape.geometry();
+Map.centerObject(geometryNZ, 5);
+
+// additional 1km buffer to NZ boundaries (ensures up-to-coast) - Clip composites to this.
+var buff_nz = geometryNZ.buffer(1000); 
+
+
+// S2, SCL masked collection <5% cloud threshold
+var NZ23_S = s2.filterBounds(buff_nz).filterDate('2023-01-01', '2023-12-31')
+.filterMetadata('CLOUDY_PIXEL_PERCENTAGE', 'less_than', 5)
+.map(maskSCL);
+
+
+// True Colour Composite // 
+
+// SCL Annual Median <5% cloud
+var nz23_s = NZ23_S.median().clip(buff_nz);
+Map.addLayer(nz23_s, truevis, '2023, Median, SCL <5%', false); 
+
+// Inspect composite image data.
+print ('nz23_s', nz23_s, true);
+
+// NDVI Composite (Note: min/max values and palette of ndvis (change as you like) //
+var nz23_ndvi = nz23_s.normalizedDifference(['B8', 'B4']);
+Map.addLayer(nz23_ndvi, ndvis, '2023, Median NDVI, SCL <5%', true); 
+
+
+
+
+
+
+
+
+
